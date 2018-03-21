@@ -4,7 +4,18 @@
 
 """
 logfactory.py
-A way to easily instantiate logs with common parameters.
+Don't want to waste time to see logging api? OK.
+Try this:
+
+from multisock import LogFactory
+# This will create a logger associated to a component named <mycomponent> and will log output into a file
+# <trace>_$date.log. Notice that the second parameter is optional (the filename) and if None or not passed
+# the logger will simply trace info on STDOUT.
+mylogger=LogFactory('mycomponent', 'traces')
+mylogger.info('Hello world!')
+mylogger.warn('Too lazy to check logging APIs. Maybe later!')
+mylogger.critical('This should never happen')
+mylogger.fatal('Farewell cruel world')
 """
 
 import logging
@@ -48,7 +59,7 @@ class LogFactory:
         self.logger.setLevel(logging.DEBUG)
         # create console handler with a higher log level
         ch = logging.StreamHandler()
-        ch.setLevel(logging.WARN)
+        ch.setLevel(logging.NOTSET)
         # create formatter and add it to the handlers
         formatter = logging.Formatter('%(asctime)-15s|%(name)-5s|%(levelname)-8s| %(message)s')
         ch.setFormatter(formatter)

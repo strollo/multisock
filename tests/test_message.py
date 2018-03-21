@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-from context import *
 import json
 import unittest
+from context import *
+from multisock import SerializableData
 
 class TestStringMethods(unittest.TestCase):
     def test_MessageToJson(self):

@@ -6,6 +6,21 @@
 Filename: channel.py
 Implements a very small and easy to use channel for connecting UDP multicast channels with
 simple operations for sending and receiving data.
+
+How easy it is...?
+
+#### THE CONSUMER ####
+import multisock
+# Create a connection to multicast group 224.1.1.1:1234
+udpchan = multisock.Channel('224.1.1.1', 1234)
+udpchan.send('Hello World')
+
+#### THE PRODUCER ####
+import multisock
+# Create a connection to multicast group 224.1.1.1:1234
+udpchan = multisock.Channel('224.1.1.1', 1234)
+(data,sender)=udpchan.recv()
+print "Received from %s: %s" % (sender, data)
 """
 
 import socket
@@ -16,7 +31,7 @@ from logfactory import *
 
 class Channel:
 
-    def __init__(self, mcast_ip, mcast_port, bufsize=4096, logger=None):
+    def __init__(self, mcast_ip, mcast_port, bufsize=4096, iface_ip=None, logger=None):
         """
         Creates a new udp multicast channel bound to a multicast group
         (e.g. 224.1.1.1) and a port.
@@ -34,6 +49,9 @@ class Channel:
         size of read/send buffers (by default 4k) and a custom logger that can
         be instantiated with the logfactory util.
 
+        The optional parameter iface_ip allows to bind socket to a specific interface given
+        its ip (e.g. localhost/0.0.0.0....)
+
         Note: the instantiation of a channel implicitly connects to the multicast
         group.
         """
@@ -42,6 +60,10 @@ class Channel:
         self.bufsize = bufsize
         self.writer = None
         self.reader = None
+        if iface_ip is not None and len(iface_ip.strip()) > 0:
+            self.iface_ip = iface_ip.strip()
+        else:
+            self.iface_ip = None
         if logger is None:
             # Logger on stdout
             self.logger = LogFactory('pymulticomm')
@@ -57,7 +79,10 @@ class Channel:
         self.writer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         _mreq = struct.pack("4sI", socket.inet_aton(self.mcast_ip), socket.INADDR_ANY)
         self.writer.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, _mreq)
-        self.writer.bind(('', self.mcast_port))
+        if self.iface_ip is not None:
+            self.writer.bind((self.iface_ip, self.mcast_port))
+        else:
+            self.writer.bind(('', self.mcast_port))
         # UDP socket reader
         self.reader = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.reader.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -66,7 +91,10 @@ class Channel:
         # setblocking(0) is equiv to settimeout(0.0) which means we poll the socket.
         # But this will raise an error if recv() or send() can't immediately find or send data.
         self.reader.setblocking(1)
-        self.reader.bind(('', self.mcast_port))
+        if self.iface_ip is not None:
+            self.reader.bind((self.iface_ip, self.mcast_port))
+        else:
+            self.reader.bind(('0.0.0.0', self.mcast_port))
         self.logger.info('UDPChannel on %s %d connected' % (self.mcast_ip, self.mcast_port))
 
     def __repr__(self):
