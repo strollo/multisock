@@ -1,0 +1,139 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
+"""
+Filename: channel.py
+Implements a very small and easy to use channel for connecting UDP multicast channels with
+simple operations for sending and receiving data.
+"""
+
+import socket
+import struct
+from serializabledata import SerializableData
+from logfactory import *
+
+
+class Channel:
+
+    def __init__(self, mcast_ip, mcast_port, bufsize=4096, logger=None):
+        """
+        Creates a new udp multicast channel bound to a multicast group
+        (e.g. 224.1.1.1) and a port.
+
+        All components connected to this group will be able to exchange
+        messages through the following primitives:
+        - send/recv: by using buffers of data (bytes or more simply strings)
+        - sendData/recvData: communicate by using instances of SerializableData.
+        The marshalling/unmarshalling of such data is implemented by transforming
+        objects info json strings (in the send way) and the other way around.
+
+        The channels can be closed (disconnected) with channel.close() method.
+
+        Additionally to ip/port parameters, it is possible to specify the max
+        size of read/send buffers (by default 4k) and a custom logger that can
+        be instantiated with the logfactory util.
+
+        Note: the instantiation of a channel implicitly connects to the multicast
+        group.
+        """
+        self.mcast_ip = mcast_ip
+        self.mcast_port = mcast_port
+        self.bufsize = bufsize
+        self.writer = None
+        self.reader = None
+        if logger is None:
+            # Logger on stdout
+            self.logger = LogFactory('pymulticomm')
+            self.logger.info('Creating UDP Channel on %s %d' % (self.mcast_ip, self.mcast_port))
+        else:
+            self.logger = logger
+        self.__init_protocol__()
+
+    def __init_protocol__(self):
+        # UDP socket writer
+        self.writer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.writer.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 32)
+        self.writer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        _mreq = struct.pack("4sI", socket.inet_aton(self.mcast_ip), socket.INADDR_ANY)
+        self.writer.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, _mreq)
+        self.writer.bind(('', self.mcast_port))
+        # UDP socket reader
+        self.reader = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.reader.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        _mreq = struct.pack("4sI", socket.inet_aton(self.mcast_ip), socket.INADDR_ANY)
+        self.reader.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, _mreq)
+        # setblocking(0) is equiv to settimeout(0.0) which means we poll the socket.
+        # But this will raise an error if recv() or send() can't immediately find or send data.
+        self.reader.setblocking(1)
+        self.reader.bind(('', self.mcast_port))
+        self.logger.info('UDPChannel on %s %d connected' % (self.mcast_ip, self.mcast_port))
+
+    def __repr__(self):
+        return 'MulticastCh<%s:%d>' % (self.mcast_ip, self.mcast_port)
+
+    def set_read_blocking(self, blocking=True):
+        """
+        By default a channel is considered blocking in read, that means that
+        a component which tries to read from a channel will wait until new
+        data is available.
+        This behaviour can be changed by setting the read non blocking thus
+        allowing the developer to implement manual polling on channels.
+        """
+        if blocking:
+            self.reader.setblocking(1)
+        else:
+            self.reader.setblocking(0)
+
+    def close(self):
+        """
+        Closes the connection to the multicast group.
+        """
+        try:
+            if self.reader is not None:
+                self.reader.close()
+        except:
+            pass
+        try:
+            if self.writer is not None:
+                self.writer.close()
+        except:
+            pass
+
+    def sendData(self, msg):
+        """
+        Sends an message instantiated as SerializableData.
+        It will be transformed into a json string before be sent on the channel.
+        """
+        if not isinstance(msg, SerializableData):
+            self.logger.error('Skipping Invalid msg type')
+            return
+        tosend=msg.toJSON()
+        self.send(tosend)
+    def recvData(self):
+        """
+        Receives a json string from the channel and transforms it into an object
+        as instance of SerializableData.
+        """
+        (_json, addr) = self.recv()
+        retval=SerializableData.fromJSON(_json)
+        return retval
+
+    def send(self, data):
+        """
+        Sends data on the channel. What else?
+        """
+        self.logger.debug('(%s:%d) >>> %s' % (self.mcast_ip, self.mcast_port, data))
+        self.writer.sendto(data, (self.mcast_ip, self.mcast_port))
+
+    def recv(self):
+        """
+        Receives data from the channel and returns a couple
+            (data,addr)
+        where addr is the sender address.
+        """
+        data, addr = self.reader.recvfrom(self.bufsize)
+        if (data is None or len(data) == 0):
+            return None
+        self.logger.debug('(%s:%d)/%s <<< %s' % (self.mcast_ip, self.mcast_port, addr, data))
+        return data, addr
