@@ -1,24 +1,26 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#
+# Copyright 2018 Daniele Strollo
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+"""The multisock library"""
 
 from channel import Channel
 from logfactory import LogFactory
 from serializabledata import SerializableData
-from package_info import *
-
-######################################################
-# Package information are imported from package_info
-# DATA IMPORTED FROM package_info.py file
-######################################################
-__author__      = package_info.__author__
-__copyright__   = package_info.__copyright__
-# __credits__   = []
-__license__     = package_info.__license__
-__version__     = package_info.__version__
-__maintainer__  = package_info.__maintainer__
-__email__       = package_info.__email__
-__status__      = package_info.__status__
-######################################################
 
 # The list of components implicitly imported by library
 __all__ = ['Channel', 'LogFactory', 'SerializableData']
+
+version = "1.0.1"
+version_info = (1, 0, 1, 0)

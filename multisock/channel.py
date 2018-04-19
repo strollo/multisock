@@ -7,7 +7,7 @@ Filename: channel.py
 Implements a very small and easy to use channel for connecting UDP multicast channels with
 simple operations for sending and receiving data.
 
-How easy it is...?
+How easy is it...?
 
 #### THE CONSUMER ####
 import multisock
