@@ -52,6 +52,7 @@ class LogFactory:
             os.makedirs(_dir)
 
     def __init_logger__(self, compname, fname):
+
         #################
         # STDOUT
         #################
@@ -61,7 +62,7 @@ class LogFactory:
         ch = logging.StreamHandler()
         ch.setLevel(logging.NOTSET)
         # create formatter and add it to the handlers
-        formatter = logging.Formatter('%(asctime)-15s|%(name)-5s|%(levelname)-8s| %(message)s')
+        formatter = logging.Formatter('%(asctime)-15s|%(name).5s|%(levelname).4s|%(message)s')
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
 
