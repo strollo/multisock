@@ -98,40 +98,6 @@ udpchan.send('Hello World')
 print "Received from %s: %s" % (sender, data)
 ```
 
-
-## SerializableData
-If you prefer to work with objects in general, an additional class is introduced.
-Instances of such a class are sent through the channel with their json representation
-and once received are converted back to objects.
-The channel primivite to communicate such objects are sendData/recvData.
-
-#### Jsonify a SerializableData
-```python
-import multisock
-from multisock import SerializableData
-
-# Creates an object and dynamically creates its attributes
-data=SerializableData()
-data.info.name='Daniele'
-data.info.surname = 'Strollo'
-data.info.email = 'daniele.strollo@gmail.com'
-
-# Prints the json representation
-print data.toJSON()
-```
-
-The output will be
-
-```json
-{
-  "info": {
-    "name": "Daniele",
-    "surname": "Strollo",
-    "email": "daniele.strollo@gmail.com",
-  }
-}
-```
-
 ## Installation
 
 #### Get sources from git

@@ -15,9 +15,6 @@ if __name__ == '__main__':
 
     time.sleep(5)
     for i in range(1000):
-        m=multisock.SerializableData()
-        m.sender=senderName
-        m.seqno=i
         print 'Sending to %s' % udpchan
-        udpchan.sendData(m)
+        udpchan.send('Hello world!')
         time.sleep(random.randint(0,1))

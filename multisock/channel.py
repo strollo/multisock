@@ -25,7 +25,6 @@ print "Received from %s: %s" % (sender, data)
 
 import socket
 import struct
-from serializabledata import SerializableData
 from logfactory import *
 
 
@@ -39,9 +38,6 @@ class Channel:
         All components connected to this group will be able to exchange
         messages through the following primitives:
         - send/recv: by using buffers of data (bytes or more simply strings)
-        - sendData/recvData: communicate by using instances of SerializableData.
-        The marshalling/unmarshalling of such data is implemented by transforming
-        objects info json strings (in the send way) and the other way around.
 
         The channels can be closed (disconnected) with channel.close() method.
 
@@ -128,30 +124,10 @@ class Channel:
         except:
             pass
 
-    def sendData(self, msg):
-        """
-        Sends an message instantiated as SerializableData.
-        It will be transformed into a json string before be sent on the channel.
-        """
-        if not isinstance(msg, SerializableData):
-            self.logger.error('Skipping Invalid msg type')
-            return
-        tosend=msg.toJSON()
-        self.send(tosend)
-    def recvData(self):
-        """
-        Receives a json string from the channel and transforms it into an object
-        as instance of SerializableData.
-        """
-        (_json, addr) = self.recv()
-        retval=SerializableData.fromJSON(_json)
-        return retval
-
     def send(self, data):
         """
         Sends data on the channel. What else?
         """
-        self.logger.debug('(%s:%d) >>> %s' % (self.mcast_ip, self.mcast_port, data))
         self.writer.sendto(data, (self.mcast_ip, self.mcast_port))
 
     def recv(self):
@@ -163,5 +139,4 @@ class Channel:
         data, addr = self.reader.recvfrom(self.bufsize)
         if (data is None or len(data) == 0):
             return None
-        self.logger.debug('(%s:%d)/%s <<< %s' % (self.mcast_ip, self.mcast_port, addr, data))
         return data, addr

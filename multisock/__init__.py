@@ -17,10 +17,9 @@
 
 from channel import Channel
 from logfactory import LogFactory
-from serializabledata import SerializableData
 
 # The list of components implicitly imported by library
-__all__ = ['Channel', 'LogFactory', 'SerializableData']
+__all__ = ['Channel', 'LogFactory']
 
 version = "1.0.1"
 version_info = (1, 0, 1, 0)

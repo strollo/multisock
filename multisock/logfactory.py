@@ -52,6 +52,10 @@ class LogFactory:
             os.makedirs(_dir)
 
     def __init_logger__(self, compname, fname):
+        if compname is not None:
+            compname=compname[:5]
+        else:
+            compname='undef'
 
         #################
         # STDOUT
@@ -62,7 +66,7 @@ class LogFactory:
         ch = logging.StreamHandler()
         ch.setLevel(logging.NOTSET)
         # create formatter and add it to the handlers
-        formatter = logging.Formatter('%(asctime)-15s|%(name).5s|%(levelname).4s|%(message)s')
+        formatter = logging.Formatter('%(asctime)-15s|%(name)-5s|%(levelname).3s|%(message)s')
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
 
