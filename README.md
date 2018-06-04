@@ -5,14 +5,9 @@ Python lib for multicasting
 
 ```
 A sample with 2 Readers B,D and 3 Writer A,C,E.
-
-     B        D
-     |        |
-+----|----+---|---+
-|         |       |
-A         C       E
-
 ```
+
+![overview](resources/sample.png)
 
 The idea behind this project is to provide a compact and easy to use library for allowinf
 components to communicate on a multicast channel (often referred to as multicast group).
