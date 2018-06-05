@@ -5,9 +5,10 @@ import multisock
 import time
 import random
 import sys
+from multisock import DataCrypto
 
 if __name__ == '__main__':
-    udpchan = multisock.Channel('224.1.1.1', 1234, 2048, '0.0.0.0')
+    udpchan = multisock.Channel('224.1.1.1', 1234, 2048, '0.0.0.0', None, DataCrypto('pwd', 'passphrase'))
 
     senderName='anonymous'
     if len(sys.argv) > 1:

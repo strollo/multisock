@@ -20,7 +20,7 @@ import warnings
 
 setup(
     name='multisock',
-    version='1.0.1',
+    version='1.0.2',
     author="Daniele Strollo",
     author_email="daniele.strollo@gmail.com",
     url='http://github.com/strollo/multisock',

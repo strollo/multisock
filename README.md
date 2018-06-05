@@ -115,6 +115,19 @@ Install this lib
 python setup.py install
 ```
 
+## Encryption
+
+From the 1.0.2 version it has been added support for encrypting exchanged data via [PyCrypto](https://pypi.org/project/pycrypto/) library.
+
+#### Usage
+
+The channel can now be instantiated by specifying a DataCrypto instance that will receive two strings (key, passphrase) to apply the encryption/decryption.
+
+```python
+from multisock import DataCrypto
+udpchan = multisock.Channel('224.1.1.1', 1234, 2048, '0.0.0.0', logger, DataCrypto('key', 'passphrase'))
+```
+
 ## Authors
 
 * **Daniele Strollo** - *Initial work* - [MultiSock](https://github.com/strollo/multisock)

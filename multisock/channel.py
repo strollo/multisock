@@ -25,12 +25,13 @@ print "Received from %s: %s" % (sender, data)
 
 import socket
 import struct
+from datacrypto import DataCrypto
 from logfactory import *
 
 
 class Channel:
 
-    def __init__(self, mcast_ip, mcast_port, bufsize=4096, iface_ip=None, logger=None):
+    def __init__(self, mcast_ip, mcast_port, bufsize=4096, iface_ip=None, logger=None, crypto=None):
         """
         Creates a new udp multicast channel bound to a multicast group
         (e.g. 224.1.1.1) and a port.
@@ -48,14 +49,16 @@ class Channel:
         The optional parameter iface_ip allows to bind socket to a specific interface given
         its ip (e.g. localhost/0.0.0.0....)
 
-        Note: the instantiation of a channel implicitly connects to the multicast
-        group.
+        Note: the instantiation of a channel implicitly connects to the multicast group.
         """
         self.mcast_ip = mcast_ip
         self.mcast_port = mcast_port
         self.bufsize = bufsize
         self.writer = None
         self.reader = None
+        if crypto is not None and not isinstance(crypto, DataCrypto):
+            raise ValueError('Invalid crypto parameter. DataCrypto instance expected')
+        self.crypto = crypto
         if iface_ip is not None and len(iface_ip.strip()) > 0:
             self.iface_ip = iface_ip.strip()
         else:
@@ -128,6 +131,8 @@ class Channel:
         """
         Sends data on the channel. What else?
         """
+        if self.crypto is not None:
+            data=self.crypto.encrypt(data)
         self.writer.sendto(data, (self.mcast_ip, self.mcast_port))
 
     def recv(self):
@@ -139,4 +144,6 @@ class Channel:
         data, addr = self.reader.recvfrom(self.bufsize)
         if (data is None or len(data) == 0):
             return None
+        if self.crypto is not None:
+            data = self.crypto.decrypt(data)
         return data, addr

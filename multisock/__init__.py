@@ -17,9 +17,10 @@
 
 from channel import Channel
 from logfactory import LogFactory
+from datacrypto import DataCrypto
 
 # The list of components implicitly imported by library
-__all__ = ['Channel', 'LogFactory']
+__all__ = ['Channel', 'LogFactory', 'DataCrypto']
 
-version = "1.0.1"
-version_info = (1, 0, 1, 0)
+version = "1.0.2"
+version_info = (1, 0, 2, 0)
