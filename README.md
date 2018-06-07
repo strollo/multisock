@@ -125,7 +125,7 @@ The channel can now be instantiated by specifying a DataCrypto instance that wil
 
 ```python
 from multisock import DataCrypto
-udpchan = multisock.Channel('224.1.1.1', 1234, 2048, '0.0.0.0', logger, DataCrypto('key', 'passphrase'))
+udpchan = multisock.Channel('224.1.1.1', 1234, crypto=DataCrypto('key', 'passphrase'))
 ```
 
 ## Authors
