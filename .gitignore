@@ -1,0 +1,15 @@
+*~
+*.pyc
+logs/
+.idea/
+dist/
+build/
+*.egg-info/
+.venv/
+htmlcov/
+.coverage
+.vscode/
+.pylintrc
+coverage.sh
+samples/venv/
+.venv/
