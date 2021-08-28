@@ -56,29 +56,11 @@ An udp multicasting channel on wich components can both read and write data.
 A channel is essentially represented by a tuple (multicast_ip, port).
 
 
-#### Customizing logger
-By default logger is configured to simply show messages on STDOUT.
-If you prefer to trace messages on a file this is the shortest way.
-
-```python
-import multisock
-from multisock import LogFactory
-
-# This will create a logger associated to a component named <mycomponent> and will log output into a file
-# <traces>_$date.log. Notice that the second parameter is optional (the filename) and if None or not passed
-# the logger will simply trace info on STDOUT.
-mylogger=LogFactory('mycomponent', 'traces')
-mylogger.info('Hello world!')
-mylogger.warn('Too lazy to check logging APIs. Maybe later!')
-mylogger.critical('This should never happen')
-mylogger.fatal('Farewell cruel world')
-```
-
 #### Connecting to a channel
 ```python
 import multisock
 # My logger is optional parameter in case you want to log on a file
-udpchan = multisock.Channel('224.1.1.1', 1234, mylogger)
+udpchan = multisock.Channel('224.1.1.1', 1234)
 ```
 
 #### Sending messages on the channel
@@ -98,7 +80,14 @@ print "Received from %s: %s" % (sender, data)
 #### Requirements
 
 > Python 3.x
-> PyCrypto (for windows use `pip install pycryptodome`)
+
+> Other requirements can be easily installed via pip by executing:
+
+```
+pip install -r requirements.txt
+```
+
+> **NOTE**: To install PyCrypto for **Windows** use `pip install pycryptodome`.
 
 #### Get sources from git
 

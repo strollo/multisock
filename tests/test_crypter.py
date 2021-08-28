@@ -5,6 +5,13 @@ import string
 from multisock.crypter import Crypter
 from multisock.exceptions import InvalidParameterException, InvalidKeyLenghtException, EncryptionInvalidParameterException
 
+class SerializableObject():
+    def __init__(self, token, payload={}):
+        if token is None or not isinstance(token, str):
+            raise ValueError('Invalid token parameter')
+        self.token = token.strip()
+        self.payload = payload
+
 
 def get_random_string(length):
     letters = string.ascii_lowercase
@@ -47,7 +54,7 @@ class Test_Crypter(unittest.TestCase):
     def test_crypter_encrypt_with_invalid_parameter_type(self):
         with self.assertRaises(EncryptionInvalidParameterException):
             c = Crypter(key=get_random_string(32), iv='The IV')
-            c.encrypt({'key' : 'value'})
+            c.encrypt({'key': 'value'})
 
     def test_encrypt_and_decrypt(self):
         crypter = Crypter(key=' --- My Key --- ', iv='The IV')
@@ -120,3 +127,21 @@ class Test_Crypter(unittest.TestCase):
         decrypted = crypter.decrypt(encrypted)
         self.assertTrue(len(decrypted) == len(initial_string))
         self.assertTrue(bytes(decrypted, 'utf-8') == initial_string)
+
+    def test_serializable_object(self):
+        crypter = Crypter(key=get_random_string(24), iv='The IV')
+        import pickle
+        import base64
+
+        # Encryption
+        obj = SerializableObject(token='/patter/tester', payload={'key1': 'value1', 'key2': 123})
+        obj_b64 = base64.b64encode(pickle.dumps(obj))
+        encrypted_bytes = crypter.encrypt(obj_b64)
+
+        # Decryption
+        decrypted_bytes = crypter.decrypt(encrypted_bytes)
+        decrypted_b64 = base64.b64decode(decrypted_bytes)
+        decrypted_obj = pickle.loads(decrypted_b64)
+
+        # Compare objects after encryption/serialization
+        self.assertTrue(pickle.dumps(obj) == pickle.dumps(decrypted_obj))

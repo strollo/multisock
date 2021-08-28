@@ -19,7 +19,11 @@ def get_random_string(length):
 MAX_KEY_LENGTH = 32
 ENCODING = 'utf-8'
 BS = 16
-is_empty_string = lambda s: s is None or not isinstance(s, str) or len(s.strip()) == 0
+
+def is_empty_string(s):
+    if s is None or not isinstance(s, str) or len(s.strip()) == 0:
+        return True
+    return False
 
 class Crypter:
     def __init__(self, key, iv):

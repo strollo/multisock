@@ -26,6 +26,8 @@ print "Received from %s: %s" % (sender, data)
 import socket
 import struct
 import logging
+import pickle
+import base64
 from multisock.crypter import Crypter
 
 class Channel:
@@ -40,8 +42,7 @@ class Channel:
     The channels can be closed (disconnected) with channel.close() method.
 
     Additionally to ip/port parameters, it is possible to specify the max
-    size of read/send buffers (by default 4k) and a custom logger that can
-    be instantiated with the logfactory util.
+    size of read/send buffers (by default 4k).
 
     The optional parameter iface_ip allows to bind socket to a specific interface given
     its ip (e.g. localhost/0.0.0.0....)
@@ -66,7 +67,7 @@ class Channel:
         self.logger = logging.getLogger()
         self.__init_protocol__()
 
-        self.logger.info('Creating UDP Channel on {ip} {port}', ip=self.mcast_ip, port=self.mcast_port)
+        self.logger.info('Creating UDP Channel on %s:%d' % (self.mcast_ip, self.mcast_port))
 
     def __init_protocol__(self):
         # UDP socket writer
@@ -112,6 +113,36 @@ class Channel:
             self.reader.close()
         finally:
             self.writer.close()
+
+    def send_object(self, obj):
+        """
+        Sends data on the channel. What else?
+        """
+        data_b64 = base64.b64encode(pickle.dumps(obj))
+        # Enncrypt if needed
+        if self.crypto is not None:
+            data_b64 = self.crypto.encrypt(data_b64)
+
+        self.writer.sendto(data_b64, (self.mcast_ip, self.mcast_port))
+
+    def recv_object(self):
+        """
+        Receives data from the channel and returns a couple
+            (data,addr)
+        where addr is the sender address.
+        """
+        data, addr = self.reader.recvfrom(self.bufsize)
+        if (data is None or len(data) == 0):
+            return None
+
+        if self.crypto is not None:
+            decrypted_bytes = self.crypto.decrypt(data)
+        else:
+            decrypted_bytes = data
+
+        decrypted_b64 = base64.b64decode(decrypted_bytes)
+        data = pickle.loads(decrypted_b64)
+        return data, addr
 
     def send(self, data):
         """

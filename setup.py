@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='multisock',
-    version='1.0.2',
+    version='1.1.0',
     author="Daniele Strollo",
     author_email="daniele.strollo@gmail.com",
     url='http://github.com/strollo/multisock',
